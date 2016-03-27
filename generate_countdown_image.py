@@ -12,11 +12,11 @@ def send_header(img, reddit, subreddit):
     reddit.upload_image(subreddit, "header_cd.png", name=None, header=True)
 
 
-def apply_text_on_image(image, text, font):
+def apply_text_on_image(image, text, font, pos):
     img = Image.open(image)
     font = ImageFont.truetype(font, 25)
     draw = ImageDraw.Draw(img)
-    draw.text((535, 50),text,(250,250,255),font=font)
+    draw.text((pos.x, pos.y),text,(250,250,255),font=font)
     draw = ImageDraw.Draw(img)
     return img
 
@@ -56,6 +56,8 @@ subreddit = conf.get('reddit', 'subreddit')
 target = conf.get('image', 'target')
 image_location = conf.get('image', 'image')
 font = conf.get('image', 'font')
+posx = conf.get('posx', 'font')
+posy = conf.get('posy', 'font')
 
 
 r = Reddit(user_agent='linux:net.dosaki.subreddit_header_countdown:0.0.1 (by /u/dosaki)')
@@ -64,5 +66,5 @@ r.login(username, password)
 target_datetime = datetime.strptime(target, '%Y %m %d %H:%M:%S')
 timediff = remaining_time(target_datetime)
 
-image = apply_text_on_image(image_location, format_time_simpler(timediff), font)
+image = apply_text_on_image(image_location, format_time_simpler(timediff), font, {'x':posx, 'y':posy})
 send_header(image, r, subreddit)
