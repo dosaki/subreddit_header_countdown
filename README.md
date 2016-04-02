@@ -6,7 +6,7 @@ Update your subreddit header with a countdown!
 Change the contents of `settings.cfg` to suit your needs. Then run
 
 ```bash
-python generate_countdown_image.py
+python header_img_text.py
 ```
 
 ## Add it to Crontab
@@ -38,5 +38,5 @@ pip install praw
 to test:
 ```bash
 cd subreddit_header_countdown
-python test/test_makes_image.py 
+python test/test_img_text.py
 ```

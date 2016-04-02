@@ -8,9 +8,13 @@ def now(fake=None):
         return datetime.strptime(fake, '%Y %m %d %H:%M:%S')
     return datetime.now()
 
-def send_header(img, reddit, subreddit):
-    img.save("header_cd.png")
-    reddit.upload_image(subreddit, "header_cd.png", name=None, header=True)
+def send_header(img):
+    reddit_cfg = get_reddit_properties(conf)
+    if reddit_cfg['upload'].lower() == "true":
+        reddit = set_up_reddit(reddit_cfg['username'], reddit_cfg['password'])
+        reddit.upload_image(reddit_cfg['subreddit'], img, name=None, header=True)
+        return True
+    return False
 
 def apply_text_on_image(image, text, font_path, pos, colour):
     rgb = parse_rgb_colour(colour)
@@ -69,12 +73,14 @@ def get_reddit_properties(conf):
     return {
         'username': conf.get('reddit', 'username'),
         'password': conf.get('reddit', 'password'),
-        'subreddit': conf.get('reddit', 'subreddit')
+        'subreddit': conf.get('reddit', 'subreddit'),
+        'upload': conf.get('reddit', 'upload')
     }
 
 def get_image_properties(conf):
     return {
-        'location': conf.get('image', 'image')
+        'source': conf.get('image', 'source'),
+        'output': conf.get('image', 'output')
     }
 
 def get_countdown_properties(conf):
@@ -109,23 +115,32 @@ def set_up_reddit(username, password):
 def format_time_simple(timediff):
     return "%s days, %sh %sm" % (timediff['days'], timediff['hours'], timediff['minutes'])
 
+def generate_image(input_path, text, font, pos, colour, output_path):
+    image = apply_text_on_image(input_path, text, font, pos, colour)
+    image.save(output_path)
+    return {
+        'image': image,
+        'path': output_path
+    }
+
 if __name__ == '__main__':
     conf = SafeConfigParser()
     conf.read('settings.cfg')
 
-    reddit_cfg = get_reddit_properties(conf)
     text_cfg = get_text_properties(conf)
     countdown_cfg = get_countdown_properties(conf)
     image_cfg = get_image_properties(conf)
+    image = None
 
-    r = set_up_reddit(reddit_cfg['username'], reddit_cfg['password'])
-
-    if countdown_cfg['enabled'] == "true":
+    if countdown_cfg['enabled'].lower() == "true":
         target_datetime = datetime.strptime(countdown_cfg['target'], '%Y %m %d %H:%M:%S')
         timediff = remaining_time(target_datetime)
-        image = apply_text_on_image(image_cfg['location'], format_time_simple(timediff), countdown_cfg['font'], countdown_cfg['pos'], countdown_cfg['colour'])
+        image = generate_image(image_cfg['source'], format_time_simple(timediff), countdown_cfg['font'], countdown_cfg['pos'], countdown_cfg['colour'], image_cfg['output'])
 
-    if text_cfg['enabled'] == "true":
-        image = apply_text_on_image(image_cfg['location'], text_cfg['text'], text_cfg['font'], text_cfg['pos'], countdown_cfg['colour'])
+    if text_cfg['enabled'].lower() == "true":
+        image = generate_image(image_cfg['output'], text_cfg['text'], text_cfg['font'], text_cfg['pos'], countdown_cfg['colour'], image_cfg['output'])
 
-    send_header(image, r, subreddit)
+    if image != None:
+        send_header(image['path'])
+    else:
+        print "Couldn't generate an image."
