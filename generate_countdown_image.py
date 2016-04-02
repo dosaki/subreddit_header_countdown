@@ -3,6 +3,11 @@ from ConfigParser import SafeConfigParser
 from datetime import datetime
 from praw import Reddit
 
+def now(fake=None):
+    if fake != None:
+        return datetime.strptime(fake, '%Y %m %d %H:%M:%S')
+    return datetime.now()
+
 def send_header(img, reddit, subreddit):
     img.save("header_cd.png")
     reddit.upload_image(subreddit, "header_cd.png", name=None, header=True)
@@ -12,12 +17,18 @@ def apply_text_on_image(image, text, font_path, pos, colour):
     img = Image.open(image)
     image_font = ImageFont.truetype(font_path, 25)
     draw = ImageDraw.Draw(img)
-    draw.text((pos['x'], pos['y']), text, fill=(rgb['r'], rgb['g'], rgb['b']), font=image_font)
+    draw.text((pos['x'],
+        pos['y']), text, fill=(
+            rgb['r'],
+            rgb['g'],
+            rgb['b']
+        ), font=image_font)
     draw = ImageDraw.Draw(img)
     return img
 
-def remaining_time(target):
-    diff = target - datetime.now()
+
+def remaining_time(target, fake=None):
+    diff = target - now(fake)
     days = diff.days
     hours = diff.seconds // 3600
     minutes = (diff.seconds - (hours * 3600)) // 60
@@ -39,12 +50,19 @@ def remaining_time(target):
         'days': days
     }
 
+def force_number(string):
+    try:
+        return int(string)
+    except:
+        return 0
+
 def parse_rgb_colour(rgb_string):
     rgb_array = rgb_string.split(',')
+
     return {
-        'r': int(rgb_array[0]),
-        'g': int(rgb_array[1]),
-        'b': int(rgb_array[2])
+        'r': force_number(rgb_array[0]),
+        'g': force_number(rgb_array[1]),
+        'b': force_number(rgb_array[2])
     }
 
 def get_reddit_properties(conf):
