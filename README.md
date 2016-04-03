@@ -15,10 +15,10 @@ crontab -e
 ```
 Use one of these below
 ```bash
-* * * * * /usr/bin/python /path/to/script/generate_countdown_image.py # every minute
-*/30 * * * * /usr/bin/python /path/to/script/generate_countdown_image.py # every half-hour
-0 * * * * /usr/bin/python /path/to/script/generate_countdown_image.py # every hour
-0 0 * * * /usr/bin/python /path/to/script/generate_countdown_image.py # every day
+* * * * * /usr/bin/python /path/to/script/header_img_text.py # every minute
+*/30 * * * * /usr/bin/python /path/to/script/header_img_text.py # every half-hour
+0 * * * * /usr/bin/python /path/to/script/header_img_text.py # every hour
+0 0 * * * /usr/bin/python /path/to/script/header_img_text.py # every day
 ```
 
 
